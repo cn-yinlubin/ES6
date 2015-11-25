@@ -1,0 +1,279 @@
+<script>
+    "use strict"
+
+
+
+
+/*
+
+    let delegatedIterator = (function* () {
+        yield 'Hello!';
+        yield 'Bye!';
+    }());
+
+    let delegatingIterator = (function* () {
+        yield 'Greetings!';
+        yield* delegatedIterator;
+        yield 'Ok, bye.';
+    }());
+
+    for(let value of delegatingIterator) {
+        console.log(value);
+    }
+    // "Greetings!
+    // "Hello!"
+    // "Bye!"
+    // "Ok, bye."
+
+
+
+    function* concat(iter1, iter2) {
+        yield* iter1;
+        yield* iter2;
+    }
+
+    // 等同于
+
+    function* concat(iter1, iter2) {
+        for (var value of iter1) {
+            yield value;
+        }
+        for (var value of iter2) {
+            yield value;
+        }
+    }
+    上面代码说明，yield*不过是for...of的一种简写形式，完全可以用后者替代前者。
+
+    如果yield*后面跟着一个数组，由于数组原生支持遍历器，因此就会遍历数组成员。
+
+
+
+
+    function* foo() {
+        yield 'a';
+        yield 'b';
+    }
+
+
+    // 等同于
+    function* bar() {
+        yield 'x';
+        for (let v of foo()) {
+            yield v;
+        }
+        yield 'y';
+    }
+
+    for (let v of bar()){
+        console.log(v);
+    }
+
+
+
+
+    function* iterTree(tree) {
+        if (Array.isArray(tree)) {
+            for(let i=0; i < tree.length; i++) {
+                yield* iterTree(tree[i]);
+            }
+        } else {
+            yield tree;
+        }
+    }
+
+    const tree = [ '1', ['2',['3',[4,[5,5],4],'3'], '2'], ['11', '11'] ];
+
+    for(let x of iterTree(tree)) {
+        console.log(x);
+    }
+
+
+
+    function* g() {}
+
+    g.prototype.hello = function () {
+        return 'hi!';
+    };
+
+    let obj = g();
+
+    obj instanceof g // true
+    obj.hello() // 'hi!'
+
+
+
+    function* loadUI() {
+        showLoadingScreen();
+        yield loadUIDataAsynchronously();
+        hideLoadingScreen();
+    }
+    var loader = loadUI();
+    // 加载UI
+    loader.next()
+
+    // 卸载UI
+    loader.next()
+
+    function* numbers() {
+        let file = new FileReader("numbers.txt");
+
+
+        while(!file.eof) {
+            yield parseInt(file.readLine(), 10);
+        }
+    }
+
+
+
+
+    function * longRunningTask() {
+        try {
+            var value1 = yield step1();
+            var value2 = yield step2(value1);
+            // Do something with value4z
+        } catch (e) {
+            // Handle any error from step1 through step4
+        }
+    }
+    function step1(){
+        setTimeout(function(){
+            alert(1)
+        },1000)
+    }
+    function step2(){
+        alert(2)
+    }
+
+    scheduler(longRunningTask());
+
+
+    function scheduler(task) {
+        setTimeout(function() {
+            var taskObj = task.next(task.value);
+            // 如果Generator函数未结束，就继续调用
+            if (!taskObj.done) {
+                task.value = taskObj.value
+                scheduler(task);
+            }
+        }, 0);
+    }
+
+ */
+
+/**
+ * 最原始的异步变为同步方法1
+
+    function yibu1(){
+        setTimeout(function(){
+// 将yibu1 的值 作为下一个next 的入参
+            g.next("1");
+        },11100)
+    }
+
+    function yibu2() {
+        setTimeout(function(){
+            g.next("2");
+        },300);
+    }
+
+    function * doit(){
+        var a = yield yibu1();
+        console.log(a);
+        var b = yield yibu2();
+        console.log(b);
+        return "hehe";
+    }
+
+    var g = doit();
+    g.next();
+*/
+/**
+
+    // 模拟一个异步回调函数
+    function yibu1(cb) {
+        setTimeout(function () {
+            cb("1");
+        }, 1000);
+    }
+    // 模拟一个异步回调函数
+    function yibu2(cb) {
+        setTimeout(function () {
+            cb("2");
+        }, 300);
+    }
+
+    function * doit() {
+        // yield 后面跟的是一个函数
+        var a = yield yibu1;
+        console.log(a);
+        var b = yield yibu2;
+        console.log(b);
+        return "over";
+    }
+    var g = doit();
+    // 目的 ：将上一个函数回调的返回值  作为下一个next 的入参
+    // value 是一个yibu1 函数
+    g.next().value(function (r) {
+        g.next(r).value(function (rr) {
+            console.log(g.next(rr).value);
+        })
+    })
+    */
+
+
+    /**
+     * 如上第二个改进版本依然有一个问题，需要知道generator 有多少个yield，最终版本如下（最简单的co版本）使用递归，递归的结束条件是返回值的done为false
+     */
+
+
+/**
+    function yibu1(cb) {
+        setTimeout(function () {
+            cb("1");
+        }, 1300);
+    }
+    // 模拟一个异步回调函数
+    function yibu2(cb) {
+        setTimeout(function () {
+            cb("2");
+        }, 300);
+    }
+
+    function * doit() {
+        var a = yield yibu1;
+        console.log(a);
+        var b = yield yibu2;
+        console.log(b);
+        return "over";
+    }
+    var gen = doit();
+    function next(result) {
+        var step = gen.next(result);
+        if (step.done == false) {
+            step.value(next);
+        } else {
+            console.log( step.value);
+        }
+    }
+    next();
+    */
+
+
+
+    var xx = (function(){
+        var sb = Symbol();
+        var app = {
+                [sb]: 'Hello!'
+    };
+        return app;
+    })()
+
+
+
+
+
+
+
+
+
+</script>

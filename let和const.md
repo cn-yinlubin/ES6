@@ -11,7 +11,15 @@ let和const不存在变量提升
 console.log(foo); // ReferenceError
 let foo = 2;
 ```
-const 不可变的只是引用的地址
+```javascript
+var tmp = 123;
+
+if (true) {
+  console.log(tmp)
+  let tmp = 456;
+}
+```
+const 不可变的只是地址
 ```javascript
 const foo = {};
 foo.prop = 123;
