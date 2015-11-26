@@ -21,8 +21,9 @@ if (true) {
 ```
 const 不可变的只是地址
 ```javascript
-const foo = {};
-foo.prop = 123;
+const foo = [];
+foo.prop = 123;//可变
+
 foo = {} // TypeError: "foo" is read-only不起作用
 ```
 如果真的想将对象冻结，应该使用Object.freeze方法。
