@@ -47,7 +47,7 @@ foo.prop = 123; // 不起作用
 ```
 [slide]
 #箭头函数
-`(x,y)=>{}` != `func(x,y){}`
+`(x,y)=>{}`  `func(x,y){}`
 [slide]
 ##外部保存的this,或用ES5引入的bind
 ```javascript
